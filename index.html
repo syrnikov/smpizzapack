@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Minecraft Resource Loader</title>
+  <link href="https://fonts.cdnfonts.com/css/minecraft-4" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-dark: #121212;
+      --panel-dark: #1e1e1e;
+      --launcher-green: #39b54a;
+      --launcher-green-hover: #45cc57;
+      --text-main: #ffffff;
+      --text-secondary: #aaaaaa;
+      --border-color: #333333;
+      --accent-green: #2ecc71;
+      --modal-overlay: rgba(0, 0, 0, 0.85);
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ─── NAVIGATION BAR ─── */
+    .nav-bar {
+      height: 60px;
+      background: #1a1a1a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .nav-icon {
+      width: 32px;
+      height: 32px;
+      image-rendering: pixelated;
+      cursor: pointer;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+
+    /* ─── HERO / WRAPPER ─── */
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    header { margin-bottom: 30px; }
+
+    .launcher-title {
+      font-family: 'Minecraft', sans-serif;                                      
+      font-size: 24px;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+
+    .launcher-subtitle {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+
+    .link {
+      display: inline-block;
+      color: var(--launcher-green);
+      text-decoration: underline;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    .link::after {
+      aspect-ratio: 1/1;
+      background-color: var(--launcher-green);
+      clip-path: polygon(14.29% 0%,14.29% 28.57%,71.43% 28.57%,71.43% 85.71%,100% 85.71%,100% 0,14.29% 0%,14.29% 71.43%,0% 71.43%,0% 100%,28.57% 100%,28.57% 71.43%,57.14% 71.43%,57.14% 42.86%,28.57% 42.86%,28.57% 71.43%,14.29% 71.43%);
+      content: "";
+      display: inline-block;
+      flex-basis: 7px;
+      flex-grow: 0;
+      flex-shrink: 0;
+      height: 7px;
+      margin-left: 5px;
+      width: 7px;
+    }
+
+    /* ─── GRID LAYOUT ─── */
+    .pack-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    /* ─── PACK CARD ─── */
+    .pack-card {
+      background: var(--panel-dark);
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .thumb-area {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #000;
+    }
+
+    .thumb-area img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.9;
+    }
+
+    .card-content {
+      padding: 20px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .pack-info h3 {
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+
+    .pack-info p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    /* ─── LAUNCHER BUTTON STYLE ─── */
+    .btn-download, .btn-close {
+      display: inline-block;
+      background-color: var(--launcher-green);
+      color: white;
+      text-decoration: none;
+      text-align: center;
+      padding: 12px 20px;
+      font-weight: bold;
+      font-size: 14px;
+      text-transform: uppercase;
+      border: none;
+      border-bottom: 3px solid #1a7a3a;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .btn-download:hover, .btn-close:hover {
+      background-color: var(--launcher-green-hover);
+    }
+
+    .btn-download:active, .btn-close:active {
+      border-bottom: 0;
+      transform: translateY(2px);
+    }
+
+    /* ─── MODAL STYLING ─── */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: var(--modal-overlay);
+      backdrop-filter: blur(4px);
+      display: none; /* Hidden by default */
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+
+    .modal-content {
+      background: var(--panel-dark);
+      border: 1px solid #444;
+      width: 90%;
+      max-width: 500px;
+      padding: 30px;
+      position: relative;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    }
+
+    .modal-header {
+      font-family: 'Minecraft', sans-serif;
+      font-size: 20px;
+      margin-bottom: 20px;
+      color: var(--launcher-green);
+    }
+
+    .instruction-step {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 15px;
+      align-items: flex-start;
+    }
+
+    .step-number {
+      background: #333;
+      color: #fff;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    .step-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
+    .step-text b { color: #fff; }
+
+    .modal-footer {
+      margin-top: 30px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    /* ─── TAGS & FOOTER ─── */
+    .tag {
+      display: inline-block;
+      font-size: 10px;
+      background: rgba(255,255,255,0.1);
+      padding: 2px 6px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    .footer {
+      margin-top: 80px;
+      padding: 40px 0;
+      border-top: 1px solid var(--border-color);
+      font-size: 11px;
+      color: #666;
+    }
+    #community-credit::after {
+    content: "";
+    display: inline-block;
+    width: 1.2em;   /* Scales with your text size */
+    height: 1.2em;  /* Scales with your text size */
+    margin-left: 5px;
+    vertical-align: middle; /* Keeps it aligned with the text baseline */
+    
+    background-image: url('assets/steamhappy.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    }
+
+    @media (max-width: 768px) {
+      .pack-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1 class="launcher-title">SMPizza Pack</h1>
+      <p class="launcher-subtitle">Select a pack corresponding to your favorite nation on the server!</p>
+      <p class="launcher-subtitle">For the complete experience, download supporting mods:</p>
+      <a href="https://modrinth.com/mod/enhanced-loading-screens" class="link">Enhanced Loading Screens</a>
+    </header>
+
+    <main class="pack-grid">
+      <div class="pack-card">
+        <div class="thumb-area"><img src="assets/solaria_thumb.jpg" alt="Solaria"></div>
+        <div class="card-content">
+          <div class="pack-info">
+            <h3>Solaria Edition</h3>
+            <p>Features custom panoramas and loading screens from the Sun King's lands.</p>
+          </div>
+          <a href="downloads/Solaria_Edition.zip" class="btn-download" download>Download</a>
+        </div>
+      </div>
+
+      <div class="pack-card">
+        <div class="thumb-area"><img src="assets/shell_thumb.jpg" alt="Shell City"></div>
+        <div class="card-content">
+          <div class="pack-info">
+            <h3>Shell City Edition</h3>
+            <p>Brings high-fidelity panoramas & loading screens of Shell City’s apartments and cityscapes.</p>
+          </div>
+          <a href="downloads/Shell_City_Edition.zip" class="btn-download" download>Download</a>
+        </div>
+      </div>
+
+      <div class="pack-card">
+        <div class="thumb-area"><img src="assets/worthington_thumb.jpg" alt="Worthington"></div>
+        <div class="card-content">
+          <div class="pack-info">
+            <h3>Worthington Edition</h3>
+            <p>Showcases the prestige of New Fusche City through unique panoramas and loading screens.</p>
+          </div>
+          <a href="downloads/Worthington_Edition.zip" class="btn-download" download>Download</a>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <p>NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG.</p>
+      <p>SPECIAL THANKS TO RAGEDDX FOR SOLARIA SCREENSHOTS, FADEBUMF FOR SUPPORT, SHEEPBOI37 FOR THE IDEA, AND THE ENTIRE SMPIZZA COMMUNITY </p>
+      <p id="community-credit">CREATED BY NOX • WITH SUPPORT FROM THE SMPIZZA COMMUNITY</p>
+    </footer>
+  </div>
+
+  <div class="modal-overlay" id="howToModal">
+    <div class="modal-content">
+      <div class="modal-header">Installation Guide</div>
+      
+      <div class="instruction-step">
+        <div class="step-number">1</div>
+        <div class="step-text">Press <b>Win + R</b>, type <b>%appdata%/.minecraft/resourcepacks</b> and press Enter.</div>
+      </div>
+
+      <div class="instruction-step">
+        <div class="step-number">2</div>
+        <div class="step-text">Drag and drop the downloaded <b>.zip</b> file into that folder.</div>
+      </div>
+
+      <div class="instruction-step">
+        <div class="step-number">3</div>
+        <div class="step-text">In-game, go to <b>Options > Resource Packs</b> and move the pack to the "Selected" column.</div>
+      </div>
+
+      <div class="instruction-step">
+        <div class="step-number">!</div>
+        <div class="step-text">If the game says <b>Pack is outdated</b>, just ignore it. If you have any issues, feel free to ask for help!</div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-close" onclick="closeModal()">Got it!</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const modal = document.getElementById('howToModal');
+    const downloadBtns = document.querySelectorAll('.btn-download');
+
+    // Show modal when any download button is clicked
+    downloadBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        // We delay it slightly so the browser doesn't block the download trigger
+        setTimeout(() => {
+          modal.style.display = 'flex';
+        }, 100);
+      });
+    });
+
+    function closeModal() {
+      modal.style.display = 'none';
+    }
+
+    // Close modal if user clicks the dark background
+    window.onclick = function(event) {
+      if (event.target == modal) {
+        closeModal();
+      }
+    }
+  </script>
+
+</body>
+</html>
