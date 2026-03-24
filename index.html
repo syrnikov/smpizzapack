@@ -193,7 +193,18 @@
       position: relative;
       box-shadow: 0 20px 40px rgba(0,0,0,0.5);
     }
-
+    .new{
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: var(--accent-green);
+      color: #fff;
+      font-size: 10px;
+      font-weight: bold;
+      padding: 8px 12px;
+      text-transform: uppercase;
+      z-index: 1;
+    }
     .modal-header {
       font-family: 'Minecraft', sans-serif;
       font-size: 20px;
@@ -280,6 +291,20 @@
       <a href="https://modrinth.com/mod/enhanced-loading-screens" class="link">Enhanced Loading Screens</a>
     </header>
 
+    <div class="pack-card">
+        <div class="thumb-area">
+          <span class="new">NEW!</span>
+          <img src="assets/totem_thumb.jpg" alt="Totem"></div>
+        <div class="card-content">
+          <div class="pack-info">
+            <h3>Statue of Liberalty Totem!</h3>
+            <p>Use the greatest historical landmark of New Fusche City as your totem! Great souvenir!</p>
+          </div>
+          <a href="downloads/Liberalty_Totem.zip" class="btn-download" download>Download</a>
+        </div>
+      </div>
+    </main>
+
     <main class="pack-grid">
       <div class="pack-card">
         <div class="thumb-area"><img src="assets/solaria_thumb.jpg" alt="Solaria"></div>
@@ -315,9 +340,11 @@
       </div>
     </main>
 
+    
+
     <footer class="footer">
       <p>NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG.</p>
-      <p>SPECIAL THANKS TO RAGEDDX FOR SOLARIA SCREENSHOTS, IUSAAAC FOR THE IDEA, AND THE ENTIRE SMPIZZA COMMUNITY </p>
+      <p>SPECIAL THANKS TO RAGEDDX FOR SOLARIA SCREENSHOTS, IUSAAAC FOR THE IDEA, TIXUL FOR THE ORIGINAL TOTEM JSON, AND THE ENTIRE SMPIZZA COMMUNITY </p>
       <p id="community-credit">CREATED BY NOX • WITH SUPPORT FROM THE SMPIZZA COMMUNITY</p>
     </footer>
   </div>
